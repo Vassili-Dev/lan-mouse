@@ -7,7 +7,6 @@ use std::collections::HashMap;
 use std::io;
 use std::os::fd::{AsFd, OwnedFd};
 use std::sync::{Arc, Mutex};
-use std::time::{SystemTime, UNIX_EPOCH};
 use wayland_client::backend::WaylandError;
 use wayland_client::WEnum;
 
@@ -185,11 +184,6 @@ struct VirtualInput {
 
 impl VirtualInput {
     fn consume_event(&self, event: Event) -> Result<(), ()> {
-        let now: u32 = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_millis() as u32;
-
         match event {
             Event::Pointer(e) => {
                 match e {
@@ -210,7 +204,7 @@ impl VirtualInput {
                     PointerEvent::AxisDiscrete120 { axis, value } => {
                         let axis: Axis = (axis as u32).try_into()?;
                         self.pointer
-                            .axis_discrete(now, axis, value as f64 / 6., value / 120);
+                            .axis_discrete(0, axis, value as f64 / 6., value / 120);
                         self.pointer.frame();
                     }
                 }
